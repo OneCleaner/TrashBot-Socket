@@ -2,6 +2,7 @@ from time import sleep
 from picamera import PiCamera
 import socket
 
+
 def camera(indirizzo, backlog=1):
     camera = PiCamera()
     camera.capture("image.png")
@@ -12,11 +13,11 @@ def camera(indirizzo, backlog=1):
         print("Server camera inizializzato. In ascolto... ")
     except socket.error as errore:  # se esplode tutto ci si riprova
         print("Qualcosa è andato storto: \n" + str(errore))
-        print("Reinizialiazzazione Server in corso...")
+        print("Reinizialiazzazione Server camera in corso...")
         camera(indirizzo, backlog=1)
     else:  # se non esplode stabiliamo la connessione
         conn, indirizzo_client = camera_skt.accept()  # conn = socket_client
-        print("Connessione Server - Client Stabilita: " + str(indirizzo_client))
+        print("Connessione Server camera - Client Stabilita: " + str(indirizzo_client))
 
         while True:
             camera.capture("image.png")

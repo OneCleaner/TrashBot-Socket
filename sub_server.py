@@ -12,7 +12,7 @@ def server(indirizzo, kit, serial, backlog=1):
         skt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    #apriamo la comunicazione tramite socket
         skt.bind(indirizzo)
         skt.listen(backlog)
-        print("Server inizializzato. In ascolto... ")
+        print("Server seriale inizializzato. In ascolto... ")
     except socket.error as errore:     #se esplode tutto ci si riprova
         print("Qualcosa è andato storto: \n" + str(errore))
         print("Reinizialiazzazione Server in corso...")
@@ -31,7 +31,7 @@ def server(indirizzo, kit, serial, backlog=1):
                 skt.close()
                 server(indirizzo, kit, serial, backlog=1)
 
-            if richiesta[0] == "ESC":    #se il client afferma di voler terminare la connessione ci rimettiamo in ascolto
+            if richiesta[0] == "ESC":  #se il client afferma di voler terminare la connessione ci rimettiamo in ascolto
                 print("\n\nConnessione con Client terminata, ritorno in ascolto")
                 skt.close()
                 server(indirizzo, kit, serial, backlog=1)
@@ -42,7 +42,7 @@ def server(indirizzo, kit, serial, backlog=1):
                 if toRead:
                     conn.sendall(("Comando ricevuto con successo! \n" + toRead.decode()).encode())
                 else:
-                    conn.sendall(("Nessuna risposta dall'Arduino...").encode()) #TODO mettere tanti try/except
+                    conn.sendall("Nessuna risposta dall'Arduino...".encode())  #TODO: mettere tanti try/except
 
             elif len(richiesta) == 2:
 
@@ -73,13 +73,10 @@ def server(indirizzo, kit, serial, backlog=1):
                     print(richiesta)
                     kit.servo[5].angle = angle
 
-
                 conn.sendall(("Comando ricevuto: " + richiesta[0] + richiesta[1]).encode())
 
 
-
-
-if __name__ == "__main__":      #eseguiamo soltanto se questa è la classe main
+if __name__ == "__main__":  #eseguiamo soltanto se questa è la classe main
 
     while True:
         try:
@@ -98,10 +95,10 @@ if __name__ == "__main__":      #eseguiamo soltanto se questa è la classe main
 
     kit = ServoKit(channels=16)
     PORTA_SERVER = input("Inserisci una porta (Qualsiasi numero tra 1024 e 65000) \n-> ")   #prendiamo la porta su cui aprire la comunicazione con il PC
-    server(("", int(PORTA_SERVER)), kit, serial, backlog=1) #TODO: decidere porta server fissa.
-
+    server(("", int(PORTA_SERVER)), kit, serial, backlog=1)
+    #TODO: decidere porta server fissa.
+    #TODO: usare threading
     x = Thread(target=server, args=(("", int(PORTA_SERVER)), kit, serial, 1,))
     x.start()
     y = Thread(target=camera, args=(("", int(PORTA_SERVER) + 100), 1,))
     y.start()
-    

@@ -38,7 +38,9 @@ def connessione_server(indirizzo_server):
         print("Connessione al Raspberry Riuscita!")
         invia_comandi(skt)
 
+
 if __name__ == "__main__":
+
     IP_RASPBERRY = input("Inserisci l'indirizzo del Raspberry \n-> ")
     PORTA_RASPBERRY = input("Inserisci la porta che hai inserito nel Raspberry \n-> ")
     connessione_server((IP_RASPBERRY, int(PORTA_RASPBERRY)))
