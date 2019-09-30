@@ -1,10 +1,11 @@
-import socket
-import time
-import sys
 import platform
+import socket
+from threading import Thread
 from serial import Serial
 from serial import SerialException
-#from adafruit_servokit import ServoKit
+from adafruit_servokit import ServoKit
+from camera_server import camera
+
 
 def server(indirizzo, kit, serial, backlog=1):
     try:
@@ -45,11 +46,36 @@ def server(indirizzo, kit, serial, backlog=1):
 
             elif len(richiesta) == 2:
 
-                if richiesta[0] == "pinza":
-                    pass #ecc
+                angle = int(richiesta[1])
+                print(richiesta)
 
-                conn.sendall((richiesta[0] + " " + richiesta[1]).encode())
-                #kit.servo[0] = int(richiesta[1])
+                if richiesta[0] == "pinza":
+                    print(richiesta)
+                    kit.servo[0].angle = angle
+
+                elif richiesta[0] == "a-pinza":
+                    print(richiesta)
+                    kit.servo[1].angle = angle
+
+                elif richiesta[0] == "base":
+                    print(richiesta)
+                    kit.servo[2].angle = angle
+
+                elif richiesta[0] == "r-pinza":
+                    print(richiesta)
+                    kit.servo[3].angle = angle
+
+                elif richiesta[0] == "altezza":
+                    print(richiesta)
+                    kit.servo[4].angle = angle
+
+                elif richiesta[0] == "estensione":
+                    print(richiesta)
+                    kit.servo[5].angle = angle
+
+
+                conn.sendall(("Comando ricevuto: " + richiesta[0] + richiesta[1]).encode())
+
 
 
 
@@ -70,6 +96,12 @@ if __name__ == "__main__":      #eseguiamo soltanto se questa è la classe main
     serial = Serial(port, 9600)  #inizializziamo la comunicazione con arduino
     serial.flushInput()
 
-    kit = 0 #ServoKit(channels=16)
+    kit = ServoKit(channels=16)
     PORTA_SERVER = input("Inserisci una porta (Qualsiasi numero tra 1024 e 65000) \n-> ")   #prendiamo la porta su cui aprire la comunicazione con il PC
     server(("", int(PORTA_SERVER)), kit, serial, backlog=1) #TODO: decidere porta server fissa.
+
+    x = Thread(target=server, args=(("", int(PORTA_SERVER)), kit, serial, 1,))
+    x.start()
+    y = Thread(target=camera, args=(("", int(PORTA_SERVER) + 100), 1,))
+    y.start()
+    
