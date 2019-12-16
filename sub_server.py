@@ -5,7 +5,19 @@ from serial import Serial
 from serial import SerialException
 from adafruit_servokit import ServoKit
 from camera_server import camera
+import RPi.GPIO as gpio
+from time import sleep
 
+MOTOR_A = 6
+MOTOR_B = 12
+MOTOR_TIME = 1.6
+
+gpio.setwarnings(False)
+gpio.setmode(gpio.BCM)
+gpio.setup(MOTOR_A, gpio.OUT)
+gpio.setup(MOTOR_B, gpio.OUT)
+gpio.output(MOTOR_A, gpio.LOW)
+gpio.output(MOTOR_B, gpio.LOW)
 
 def server(indirizzo, kit, serial, backlog=1):
     try:
@@ -36,7 +48,19 @@ def server(indirizzo, kit, serial, backlog=1):
                 skt.close()
                 server(indirizzo, kit, serial, backlog=1)
 
-            if len(richiesta) == 1:
+            if richiesta[0] == "pinza-apri":
+                gpio.output(MOTOR_A, gpio.HIGH)
+                gpio.output(MOTOR_B, gpio.LOW)
+                sleep(MOTOR_TIME)
+                gpio.output(MOTOR_B, gpio.HIGH)
+
+            if richiesta[0] == "pinza_chiudi":
+                gpio.output(MOTOR_A, gpio.LOW)
+                gpio.output(MOTOR_B, gpio.HIGH)
+                sleep(MOTOR_TIME)
+                gpio.output(MOTOR_B, gpio.HIGH)
+
+            elif len(richiesta) == 1:
                 serial.write(richiesta[0].encode())
                 toRead = serial.readline()
                 if toRead:
@@ -49,29 +73,25 @@ def server(indirizzo, kit, serial, backlog=1):
                 angle = int(richiesta[1])
                 print(richiesta)
 
-                if richiesta[0] == "pinza":
-                    print(richiesta)
-                    kit.servo[0].angle = angle
-
-                elif richiesta[0] == "a-pinza":
-                    print(richiesta)
-                    kit.servo[1].angle = angle
-
-                elif richiesta[0] == "base":
-                    print(richiesta)
-                    kit.servo[2].angle = angle
-
-                elif richiesta[0] == "r-pinza":
-                    print(richiesta)
-                    kit.servo[3].angle = angle
-
-                elif richiesta[0] == "altezza":
+                if richiesta[0] == "base":
                     print(richiesta)
                     kit.servo[4].angle = angle
 
-                elif richiesta[0] == "estensione":
+                elif richiesta[0] == "zero":
                     print(richiesta)
-                    kit.servo[5].angle = angle
+                    kit.servo[3].angle = angle
+
+                elif richiesta[0] == "rotazione-pinza":
+                    print(richiesta)
+                    kit.servo[12].angle = angle
+
+                elif richiesta[0] == "non-funziona":
+                    print(richiesta)
+                    kit.servo[8].angle = angle
+
+                elif richiesta[0] == "rotazione-base":
+                    print(richiesta)
+                    kit.servo[2].angle = angle
 
                 conn.sendall(("Comando ricevuto: " + richiesta[0] + richiesta[1]).encode())
 
