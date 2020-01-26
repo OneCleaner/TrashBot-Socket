@@ -62,8 +62,8 @@ criteria =(cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 criteria_stereo= (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
 
-cbrow = 10  #valori della schacchiera
-cbcol = 6
+cbrow = 6  #valori della schacchiera
+cbcol = 9
 
 n_photos = 3 #numero di foto
 
