@@ -29,8 +29,8 @@ while True:
     grayL= cv2.cvtColor(frameL,cv2.COLOR_BGR2GRAY)
 
     # Find the chess board corners
-    retR, cornersR = cv2.findChessboardCorners(grayR,(6,10),None)  # Define the number of chess corners (here 9 by 6) we are looking for with the right Camera
-    retL, cornersL = cv2.findChessboardCorners(grayL,(6,10),None)  # Same with the left camera
+    retR, cornersR = cv2.findChessboardCorners(grayR,(9,6),None)  # Define the number of chess corners (here 9 by 6) we are looking for with the right Camera
+    retL, cornersL = cv2.findChessboardCorners(grayL,(9,6),None)  # Same with the left camera
     cv2.imshow('imgR',frameR)
     cv2.imshow('imgL',frameL)
 
@@ -40,8 +40,8 @@ while True:
         corners2L= cv2.cornerSubPix(grayL,cornersL,(11,11),(-1,-1),criteria)
 
         # Draw and display the corners
-        cv2.drawChessboardCorners(grayR,(6,10),corners2R,retR)
-        cv2.drawChessboardCorners(grayL,(6,10),corners2L,retL)
+        cv2.drawChessboardCorners(grayR,(9,6),corners2R,retR)
+        cv2.drawChessboardCorners(grayL,(9,6),corners2L,retL)
         cv2.imshow('VideoR',grayR)
         cv2.imshow('VideoL',grayL)
 
