@@ -21,6 +21,8 @@ SFEVL53L1X distanceSensor(Wire, -1, -1);
 #define pwm_c 5
 #define pwm_d 3
 
+#define BUZZER 2
+
 bool isMoving = false;
 
 #define led_freni A0
@@ -91,9 +93,16 @@ void loop(void){
 
   }
 
-  if(distance[2] < 500 || distance[3] < 500 || distance[7] < 1500) {
+  if(distance[2] < 250 || distance[3] < 250 || distance[7] < 250) {
     setVelocity(0);
-  } else if(isMoving) setVelocity(255);
+
+    tone(BUZZER, 1000, 100);
+  } else {
+    
+    tone(BUZZER, 0, 100);
+    
+    if(isMoving) setVelocity(velocity); //setVelocity(255);
+  }
 
   while(Serial.available() > 0){
     data = Serial.readString();
