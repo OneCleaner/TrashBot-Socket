@@ -30,14 +30,16 @@ def run():
         # ------------------------------
 
         # cameras variables
-        left_camera_source = 1
-        right_camera_source = 2
-        pixel_width = 640
-        pixel_height = 480
-        angle_width = 78
-        angle_height = 64 # 63
-        frame_rate = 20
-        camera_separation = 5 + 15/16
+        left_camera_source = 0
+        right_camera_source = 1
+        pixel_width = 1920
+        pixel_height = 1080
+        angle_width = 52.2
+        angle_height = 38.8 # 63
+        angle_width_2 = 39.2
+        angle_height_2 = 29.2
+        frame_rate = 30
+        camera_separation = 11.6 / 2.54 #conversione in pollici #11.6 +- 0.1 cm o 11.7 +-0.1 cm
 
         # left camera 1
         ct1 = Camera_Thread()
@@ -52,6 +54,7 @@ def run():
         ct2.camera_width = pixel_width
         ct2.camera_height = pixel_height
         ct2.camera_frame_rate = frame_rate
+        ct2.buffer_all = False
 
         # camera coding
         #ct1.camera_fourcc = cv2.VideoWriter_fourcc(*"YUYV")
@@ -69,6 +72,9 @@ def run():
 
         # cameras are the same, so only 1 needed
         angler = Frame_Angles(pixel_width,pixel_height,angle_width,angle_height)
+        angler.build_frame()
+
+        angler2 = Frame_Angles(pixel_width, pixel_height, angle_width_2, angle_height_2)
         angler.build_frame()
 
         # ------------------------------
@@ -171,14 +177,23 @@ def run():
                                 
                         # get angles from camera centers
                         xlangle,ylangle = angler.angles_from_center(x1m,y1m,top_left=True,degrees=True)
-                        xrangle,yrangle = angler.angles_from_center(x2m,y2m,top_left=True,degrees=True)
+                        xrangle,yrangle = angler2.angles_from_center(x2m,y2m,top_left=True,degrees=True)
+
+                        #x : angle_width = xrangle : angle_width_2
+
+                        xrangle = xrangle * angle_width / angle_width_2 #proporzione per portare gli angoli sulla stessa linea
+                        yrangle = yrangle * angle_height / angle_height_2 
                         
+                        print('xlangle: ' + str(xlangle) + " ylangle: " + str(ylangle) + " xrangle: " + str(xrangle) + " yrangle: " + str(yrangle))
                         # triangulate
                         X,Y,Z,D = angler.location(camera_separation,(xlangle,ylangle),(xrangle,yrangle),center=True,degrees=True)
+                        D *= 2.54
         
             # display camera centers
             angler.frame_add_crosshairs(frame1)
-            angler.frame_add_crosshairs(frame2)
+            angler2.frame_add_crosshairs(frame2)
+
+
 
             # display coordinate data
             fps1 = int(ct1.current_frame_rate)
@@ -247,6 +262,8 @@ def run():
     # done
     print('DONE')
 
+    sys.exit()
+
 # ------------------------------
 # Camera Tread
 # ------------------------------
@@ -285,8 +302,8 @@ class Camera_Thread:
 
     # camera setup
     camera_source = 0
-    camera_width = 640
-    camera_height = 480
+    camera_width = 1920
+    camera_height = 1080
     camera_frame_rate = 30
     camera_fourcc = cv2.VideoWriter_fourcc(*"MJPG")
 
@@ -452,7 +469,8 @@ class Camera_Thread:
 
         # get from buffer (fail if empty)
         try:
-            frame = self.buffer.get(timeout=wait)
+            #frame = self.buffer.get(timeout=wait)
+            _, frame = self.camera.read()
             self.frames_returned += 1
         except queue.Empty:
             #print('Queue Empty!')
@@ -554,7 +572,7 @@ class Frame_Motion:
         frame3 = cv2.dilate(frame3,self.dilation_kernel,iterations=self.dilation_iterations)
 
         # get contours
-        frame3,contours,hierarchy = cv2.findContours(frame3,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        contours,hierarchy = cv2.findContours(frame3,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 
         # targets
         targets = []
@@ -945,6 +963,7 @@ class Frame_Angles:
 # ------------------------------
 # Testing
 # ------------------------------
+
 
 if __name__ == '__main__':
     run()
